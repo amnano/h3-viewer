@@ -110,41 +110,36 @@ var app = new Vue({
             if (hexLayer) {
                 hexLayer.remove();
             }
-        
+
             hexLayer = L.layerGroup().addTo(map);
-        
-            // Always use H3 resolution for zoom level 10
-            this.currentH3Res = 10; // Always use H3 resolution for zoom level 10
-        
-            const { _southWest: sw, _northEast: ne } = map.getBounds();
-        
-            const boundsPolygon = [
+
+            const zoom = map.getZoom();
+            this.currentH3Res = getH3ResForMapZoom(zoom);
+            const { _southWest: sw, _northEast: ne} = map.getBounds();
+
+            const boundsPolygon =[
                 [ sw.lat, sw.lng ],
                 [ ne.lat, sw.lng ],
                 [ ne.lat, ne.lng ],
                 [ sw.lat, ne.lng ],
                 [ sw.lat, sw.lng ],
             ];
-            const initialLat = 48.8566; // Latitude for Paris
-            const initialLng = 2.3522; // Longitude for Paris
-            const initialZoom = 10; // Set default zoom to 10
-        
-            // Use fixed resolution for H3, corresponding to zoom level 10
+
             const h3s = h3.polygonToCells(boundsPolygon, this.currentH3Res);
-        
+
             for (const h3id of h3s) {
-        
+
                 const polygonLayer = L.layerGroup()
                     .addTo(hexLayer);
-        
+
                 const isSelected = h3id === this.searchH3Id;
-        
+
                 const style = isSelected ? { fillColor: "orange" } : {};
-        
+
                 const h3Bounds = h3.cellToBoundary(h3id);
                 const averageEdgeLength = this.computeAverageEdgeLengthInMeters(h3Bounds);
                 const cellArea = h3.cellArea(h3id, "m2");
-        
+
                 const tooltipText = `
                 Cell ID: <b>${ h3id }</b>
                 <br />
@@ -152,13 +147,13 @@ var app = new Vue({
                 <br />
                 Cell area (m^2): <b>${ cellArea.toLocaleString() }</b>
                 `;
-        
+
                 const h3Polygon = L.polygon(h3BoundsToPolygon(h3Bounds), style)
                     .on('click', () => copyToClipboard(h3id))
                     .bindTooltip(tooltipText)
                     .addTo(polygonLayer);
-        
-                // Less SVG, otherwise perf is bad
+
+                // less SVG, otherwise perf is bad
                 if (Math.random() > 0.8 || isSelected) {
                     var svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                     svgElement.setAttribute('xmlns', "http://www.w3.org/2000/svg");
@@ -169,7 +164,7 @@ var app = new Vue({
                 }
             }
         },
-        
+
         gotoLocation: function() {
             const [lat, lon] = (this.gotoLatLon || "").split(",").map(Number);
             if (Number.isFinite(lat) && Number.isFinite(lon)
@@ -216,9 +211,9 @@ var app = new Vue({
             }).addTo(map);
             pointsLayer = L.layerGroup([]).addTo(map);
 
-            const initialLat = 48.8566; // Latitude for Paris
-            const initialLng = 2.3522; // Longitude for Paris
-            const initialZoom = 10; // Set default zoom to 10
+            const initialLat = queryParams.lat ?? 0;
+            const initialLng = queryParams.lng ?? 0;
+            const initialZoom = queryParams.zoom ?? 5;
             map.setView([initialLat, initialLng], initialZoom);
             map.on("zoomend", this.updateMapDisplay);
             map.on("moveend", this.updateMapDisplay);
