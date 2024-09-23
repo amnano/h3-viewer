@@ -114,7 +114,7 @@ var app = new Vue({
             hexLayer = L.layerGroup().addTo(map);
         
             // Always use H3 resolution for zoom level 10
-            this.currentH3Res = ZOOM_TO_H3_RES_CORRESPONDENCE[10]; // Fixed H3 resolution for zoom 10
+            this.currentH3Res = 10; // Always use H3 resolution for zoom level 10
         
             const { _southWest: sw, _northEast: ne } = map.getBounds();
         
@@ -125,6 +125,9 @@ var app = new Vue({
                 [ sw.lat, ne.lng ],
                 [ sw.lat, sw.lng ],
             ];
+            const initialLat = 48.8566; // Latitude for Paris
+            const initialLng = 2.3522; // Longitude for Paris
+            const initialZoom = 10; // Set default zoom to 10
         
             // Use fixed resolution for H3, corresponding to zoom level 10
             const h3s = h3.polygonToCells(boundsPolygon, this.currentH3Res);
@@ -213,9 +216,9 @@ var app = new Vue({
             }).addTo(map);
             pointsLayer = L.layerGroup([]).addTo(map);
 
-            const initialLat = queryParams.lat ?? 0;
-            const initialLng = queryParams.lng ?? 0;
-            const initialZoom = queryParams.zoom ?? 5;
+            const initialLat = 48.8566; // Latitude for Paris
+            const initialLng = 2.3522; // Longitude for Paris
+            const initialZoom = 10; // Set default zoom to 10
             map.setView([initialLat, initialLng], initialZoom);
             map.on("zoomend", this.updateMapDisplay);
             map.on("moveend", this.updateMapDisplay);
