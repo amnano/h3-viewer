@@ -25,18 +25,18 @@ const ZOOM_TO_H3_RES_CORRESPONDENCE = {
     10: 5,
     11: 6,
     12: 6,
-    13: 7,
-    14: 8,
-    15: 9,
-    16: 9,
+    13: 10,
+    14: 10,
+    15: 10,
+    16: 10,
     17: 10,
     18: 10,
-    19: 11,
-    20: 11,
-    21: 12,
-    22: 13,
-    23: 14,
-    24: 15,
+    19: 10,
+    20: 10,
+    21: 10,
+    22: 10,
+    23: 10,
+    24: 10,
 };
 
 const H3_RES_TO_ZOOM_CORRESPONDENCE = {};
@@ -128,13 +128,15 @@ var app = new Vue({
             const h3s = h3.polygonToCells(boundsPolygon, this.currentH3Res);
 
             for (const h3id of h3s) {
-
                 const polygonLayer = L.layerGroup()
                     .addTo(hexLayer);
 
                 const isSelected = h3id === this.searchH3Id;
 
-                const style = isSelected ? { fillColor: "orange" } : {};
+                // Set style based on zoom level
+                const style = (zoom === 14 || zoom === 15 || zoom === 13) ? 
+                    { fillColor: "transparent", weight: 1 } : // Transparent fill for zoom 14 and 15
+                    { fillColor: "transparent", weight: 2 }; // Default border thickness
 
                 const h3Bounds = h3.cellToBoundary(h3id);
                 const averageEdgeLength = this.computeAverageEdgeLengthInMeters(h3Bounds);
@@ -211,9 +213,10 @@ var app = new Vue({
             }).addTo(map);
             pointsLayer = L.layerGroup([]).addTo(map);
 
-            const initialLat = queryParams.lat ?? 0;
-            const initialLng = queryParams.lng ?? 0;
-            const initialZoom = queryParams.zoom ?? 5;
+            // Set initial view over Paris (latitude: 48.8566, longitude: 2.3522)
+            const initialLat = 48.8566; // Latitude for Paris
+            const initialLng = 2.3522;   // Longitude for Paris
+            const initialZoom = queryParams.zoom ?? 13; // Keep existing zoom or default to 5
             map.setView([initialLat, initialLng], initialZoom);
             map.on("zoomend", this.updateMapDisplay);
             map.on("moveend", this.updateMapDisplay);
